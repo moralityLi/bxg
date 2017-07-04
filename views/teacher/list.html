@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>学IT - 后台管理系统</title>
     <?php include "/views/public/css.html" ?>
 </head>
+
 <body>
-    
+
     <!-- 侧边栏 -->
-   <?php include "/views/public/aside.html" ?>
+    <?php include "/views/public/aside.html" ?>
     <!-- 主体 -->
     <div class="main">
         <div class="container-fluid">
             <!-- 头部 -->
-           <?php include "/views/public/header.html" ?>
+            <?php include "/views/public/header.html" ?>
             <!-- 讲师列表 -->
             <div class="body teacher-list">
                 <!-- 面包屑 -->
@@ -41,26 +43,14 @@
                                 <th>编号</th>
                                 <th>姓名</th>
                                 <th>昵称</th>
-                                <th>年龄</th>
+                                <th>出生日期</th>
                                 <th>性别</th>
                                 <th>手机号码</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>赵玉川</td>
-                                <td>布头儿</td>
-                                <td>28</td>
-                                <td>男</td>
-                                <td>15901256171</td>
-                                <td>
-                                    <a href="#teacherModal" data-toggle="modal" class="btn btn-info btn-xs">查 看</a>
-                                    <a href="/teacher/add" class="btn btn-info btn-xs">编 辑</a>
-                                    <a href="javascript::" class="btn btn-warning btn-xs">注 销</a>
-                                </td>
-                            </tr>
+                        <tbody id="teacherlist">
+                            <!--挖个坑-->
                         </tbody>
                     </table>
                 </div>
@@ -68,8 +58,48 @@
         </div>
     </div>
 
-    <!-- 模态框 添加课程 -->
+    <!-- 模态框 讲师信息 -->
     <div class="modal fade" id="teacherModal">
+        <!--挖个坑-->
+    </div>
+    <!--讲师列表的模板-->
+    <script type="text/template" id="teacherlist-tpl">
+        {{each result as item index}}
+        <tr>
+            <td>{{index+1}}</td>
+            <td>{{item.tc_name}}</td>
+            <td>{{item.tc_roster}}</td>
+            <td>{{item.tc_birthday}}</td>
+            <!--
+                需要注意的地方:在模板渲染性别时,后台返回的数据是0和1,要将
+                后台返回的数据转换成男和女,所以要进行判断item.tc_gender的值,
+                然后匹配男和女
+            -->
+            {{if item.tc_gender== "0"}}
+            <td>男</td>
+            {{else}}
+            <td>女</td>
+            {{/if}}
+            <td>{{item.tc_cellphone}}</td>
+            <!--为了在查看,编辑,注销功能时,使用上面的list接口渲染出来的tc_id,所以用了一个自定义属性data-id来存储上面返回的tc_id的值,以便后面使用-->
+            <!--为何把data-id放到td里面,就是因为下面的三个功能都要使用到这个tc_id作为每个讲师的身份标识-->
+            <td data-id="{{item.tc_id}}">
+                <a href="javascript:;" data-toggle="modal" class="btn btn-info btn-xs btn-check">查 看</a>
+                <!--编辑功能:在a链接跳转的时候,给href拼接上一个当前讲师的id,显示在地址栏中,是为了在编辑页面能够找到对应的讲师信息,然后进行编辑-->
+                <a href="/teacher/add?id={{item.tc_id}}" class="btn btn-info btn-xs">编 辑</a>
+                <!--根据讲师列表返回的当前讲师的tc_status的值,来判断是启用状态还是注销状态-->
+                <!--逻辑:当你的状态是1时,证明当前的讲师是启用状态,所以要把它的样式改为注销,以便管理员可以对你进行注销操作-->
+                {{if item.tc_status== 0}}
+                <a href="javascript:;" data-status="{{item.tc_status}}" class="btn btn-warning btn-xs btn-onoff">注 销</a>
+                {{else}}
+                <a href="javascript:;"  data-status="{{item.tc_status}}"  class="btn btn-success btn-xs btn-onoff">启 用</a>
+                {{/if}}
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <!--查看讲师的模态框模板-->
+    <script type="text/template" id="checklist">
         <div class="modal-dialog" style="width: 750px;">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -80,35 +110,48 @@
                     <table class="table table-bordered table-condensed">
                         <tbody>
                             <tr>
-                                <th>姓名:</th><td>赵玉川</td>
-                                <th>职位:</th><td colspan="3">讲师</td>
+                                <th>姓名:</th>
+                                <td>{{tc_name}}</td>
+                                <th>职位:</th>
+                                <td colspan="3">讲师</td>
                                 <td rowspan="4" width="128">
                                     <div class="avatar">
-                                        <img src="./images/default.png" alt="">
+                                        {{if tc_avatar==""}}
+                                        <img src="/views/static/images/default.png" alt=""> {{else}}
+                                        <img src="{{tc_avatar}}" alt=""> {{/if}}
                                     </div>
                                 </td>
                             </tr>
                             <tr>
-                                <th>花名:</th><td>麻衣长老</td>
-                                <th>出生日期:</th><td colspan="3">2015-11-13</td>
+                                <th>花名:</th>
+                                <td>{{tc_roster}}</td>
+                                <th>出生日期:</th>
+                                <td colspan="3">{{tc_birthday}}</td>
                             </tr>
                             <tr>
-                                <th>性别:</th><td>男</td>
-                                <th>出生日期:</th><td colspan="3">1985-05-25</td>
+                                <th>性别:</th>
+                                {{if tc_gender=="0"}}
+                                <td>男</td>
+                                {{else}}
+                                <td>女</td>
+                                {{/if}}
+                                <th>入职日期:</th>
+                                <td colspan="3">{{tc_join_date}}</td>
                             </tr>
                             <tr>
-                                <th>手机号码:</th><td colspan="2">13051524959</td>
-                                <th>邮箱:</th><td colspan="2">zhaoyuchuan@itcast.cn</td>
+                                <th>手机号码:</th>
+                                <td colspan="2">{{tc_cellphone}}</td>
+                                <th>邮箱:</th>
+                                <td colspan="2">{{tc_email}}</td>
                             </tr>
                             <tr>
-                                <th>籍贯:</th><td colspan="6">河北省 保定市 曲阳县</td>
+                                <th>籍贯:</th>
+                                <td colspan="6" class="hometown">{{tc_hometown}}</td>
                             </tr>
                             <tr>
                                 <td colspan="7">
                                     <div class="introduce">
-                                        <p>豫章故郡，洪都新府。星分翼轸，地接衡庐。襟三江而带五湖，控蛮荆而引瓯越。物华天宝，龙光射牛斗之墟；人杰地灵，徐孺下陈蕃之榻。雄州雾列，俊采星驰。台隍枕夷夏之交，宾主尽东南之美。都督阎公之雅望，棨戟遥临；宇文新州之懿范，襜帷暂驻。十旬休假，胜友如云；千里逢迎，高朋满座。腾蛟起凤，孟学士之词宗；紫电青霜，王将军之武库。家君作宰，路出名区；童子何知，躬逢胜饯。</p>
-                                        <p>时维九月，序属三秋。潦水尽而寒潭清，烟光凝而暮山紫。俨骖騑于上路，访风景于崇阿。临帝子之长洲，得仙人之旧馆。层峦耸翠，上出重霄；飞阁流丹，下临无地。鹤汀凫渚，穷岛屿之萦回；桂殿兰宫，列冈峦之体势。</p>
-                                        <p>披绣闼，俯雕甍，山原旷其盈视，川泽纡其骇瞩。闾阎扑地，钟鸣鼎食之家；舸舰迷津，青雀黄龙之舳。云销雨霁，彩彻区明。落霞与孤鹜齐飞，秋水共长天一色。渔舟唱晚，响穷彭蠡之滨，雁阵惊寒，声断衡阳之浦。</p>
+                                        {{tc_introduce}}
                                     </div>
                                 </td>
                             </tr>
@@ -117,11 +160,14 @@
                 </div>
             </div>
         </div>
-    </div>
+
+    </script>
+
 
     <?php include "/views/public/js.html" ?>
     <script>
         require(["static/js/teacher/list"]);
     </script>
 </body>
+
 </html>

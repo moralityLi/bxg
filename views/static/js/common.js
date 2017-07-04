@@ -1,4 +1,14 @@
-define(["jquery", "template", "cookie"], function ($, template) {
+define(["jquery", "template","nprogress", "cookie"], function ($, template,NProgress) {
+	//使用进度条插件
+	NProgress.start();
+	NProgress.done();
+	//ajaxStart()和ajaxStop()是两个全局事件,所有的ajax请求都会触发这两个事件
+	$(document).ajaxStart(function(){
+		NProgress.start();
+	});
+	$(document).ajaxStop(function(){
+		NProgress.done();
+	});
 	//1.首页中侧边栏的头像和描述信息的实现
 	$(function () {
 		//只有登录页才有登录信息,判断一个页面是否在本页的方法,就是使用location地址

@@ -5,8 +5,8 @@
             type:"post",
             success:function(data){
                 if(data.code == 200 ){
-                    //把数据用cookie存起来
-                    $.cookie("userinfo",JSON.stringify(data.result),{path:"/"});
+                    //把数据用cookie存起来,jquery的cookie插件的使用
+                    $.cookie("userinfo",JSON.stringify(data.result),{path:"/",expires: 1});
                     location.href = "/";
                 }
             }

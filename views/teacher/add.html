@@ -1,75 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>学IT - 后台管理系统</title>
     <?php include "/views/public/css.html"?>
 </head>
+
 <body>
-    
-  <!-- 侧边栏 -->
+
+    <!-- 侧边栏 -->
     <?php include "/views/public/aside.html" ?>
     <!-- 主体 -->
     <div class="main">
         <div class="container-fluid">
-           <!-- 头部 -->
+            <!-- 头部 -->
             <?php  include "/views/public/header.html" ?>
             <div class="body teacher">
-                <!-- 面包屑 -->
-                <ol class="breadcrumb">
-                    <li><a href="javascript:;">讲师管理</a></li>
-                    <li class="active">讲师添加</li>
-                </ol>
-                <div class="teacher-add">
-                    <form action="" class="form-horizontal col-xs-offset-2">
-                        <div class="form-group">
-                            <label for="" class="col-xs-3 control-label">姓名</label>
-                            <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm" placeholder="讲师名称">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-xs-3 control-label">密码</label>
-                            <div class="col-xs-4">
-                                <input type="password" class="form-control input-sm">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-xs-3 control-label">入职时间</label>
-                            <div class="col-xs-4">
-                                <input type="text" class="form-control input-sm">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-xs-3 control-label">类型</label>
-                            <div class="col-xs-2">
-                                <select name="" class="form-control input-sm">
-                                    <option value="">讲师</option>
-                                    <option value="">管理员</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-xs-3 control-label">性别</label>
-                            <div class="col-xs-4">
-                                <label class="radio-inline">
-                                    <input type="radio" checked> 男
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio"> 女
-                                </label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-xs-7">
-                                <a href="./advert_list.html" class="btn btn-success btn-sm pull-right"> 添 加 </a>
-                            </div>                          
-                        </div>
-                    </form>
-                </div>
+                <!--挖个坑-->
             </div>
         </div>
     </div>
+
+    <!--渲染模板-->
+    <script type="text/template" id="teacher-tpl">
+        <!-- 面包屑 -->
+        <ol class="breadcrumb">
+            <li><a href="javascript:;">讲师管理</a></li>
+            <li class="active">讲师{{title}}</li>
+        </ol>
+        <div class="teacher-add">
+            <form action="" id="teacherform" class="form-horizontal col-xs-offset-2">
+                <!--隐藏域,为了在编辑讲师页面使用-->
+                <input type="hidden" name="tc_id" value="{{tc_id}}">
+                <div class="form-group">
+                    <label for="" class="col-xs-3 control-label">姓名</label>
+                    <div class="col-xs-4">
+                        <input type="text" name="tc_name" data-required data-description="tcname" data-describedby="msgfortcname" value="{{tc_name}}" class="form-control input-sm" placeholder="讲师名称">
+                    </div>
+                    <label id="msgfortcname" class="control-label hide">错误提示消息</label>
+                </div>
+                <!--判断一下,如果没有tc_id,说明是在添加页面,就显示密码框.如果有tc_id,那就是在编辑页面,不显示密码框-->
+                {{if !tc_id}}
+                <div class="form-group">
+                    <label for="" class="col-xs-3 control-label">密码</label>
+                    <div class="col-xs-4">
+                        <input type="password" name="tc_pass"  data-description="tcpass" data-describedby="msgfortcpass" data-required value="{{tc_pass}}" class="form-control input-sm">
+                    </div>
+                    <label id="msgfortcpass" class="control-label hide">错误提示消息</label>
+                </div>
+                {{/if}}
+                <div class="form-group">
+                    <label for="" class="col-xs-3 control-label">入职时间</label>
+                    <div class="col-xs-4">
+                        <input type="text" name="tc_join_date" data-description="tcjoindate" data-describedby="msgfortcjoindate" data-required value="{{tc_join_date}}" class="form-control input-sm">
+                    </div>
+                      <label id="msgfortcjoindate" class="control-label hide">错误提示消息</label>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-xs-3 control-label">类型</label>
+                    <div class="col-xs-2">
+                        <select name="tc_type" class="form-control input-sm">
+                                    <option value="1" {{if tc_type==1}}selected{{/if}}>讲师</option>
+                                    <option value="0" {{if tc_type==1}}selected{{/if}}>管理员</option>
+                                </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-xs-3 control-label">性别</label>
+                    <div class="col-xs-4">
+                        <label class="radio-inline">
+                                    <input type="radio" name="tc_gender" value="0" {{if tc_gender==0}} checked {{/if}}> 男
+                                </label>
+                        <label class="radio-inline">
+                                    <input type="radio"  name="tc_gender" value="1" {{if tc_gender==1}} checked {{/if}}> 女
+                                </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-7">
+                        <button class="btn btn-success btn-sm pull-right" id="btnSave" data-type="{{type}}"> {{btnText}} </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </script>
+
     <?php include "/views/public/js.html"?>
+    <script>
+        require(["static/js/teacher/add"]);
+    </script>
 </body>
+
 </html>
