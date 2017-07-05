@@ -12,7 +12,8 @@ require.config({
         "validate":"assets/jquery-validate/jquery-validate.min",
         "nprogress":"assets/nprogress/nprogress",
         "ckeditor":"assets/ckeditor/ckeditor",
-         "region": "assets/jquery-region/jquery.region"
+        "region":"assets/jquery-region/jquery.region",
+        "uploadify":"assets/uploadify/jquery.uploadify.min"
     },
     shim:{
         "datepicker-zh":{
@@ -25,7 +26,11 @@ require.config({
             deps:["jquery"]
         },
         "ckeditor":{
-            exports:["CKEDITOR"]
+            //导出项和依赖项的配置是不一样的,依赖项要用数组,导出项不需要
+            exports:"CKEDITOR"
+        },
+        "uploadify":{
+            deps:["jquery"]
         }
     }
 })

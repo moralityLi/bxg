@@ -150,7 +150,7 @@ var requirejs, require, define;
             return value;
         }
         var g = global;
-        each(value.split('.'), function (part) {
+        each(value.split('.'),function (part) {
             g = g[part];
         });
         return g;
